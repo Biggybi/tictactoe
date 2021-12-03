@@ -9,73 +9,172 @@
 #include <fcntl.h>
 #include <string.h>
 #include <bsd/string.h>
+#include <time.h>
 
 void	grid_init(s_grid *grid)
 {
 	int		i;
 
-	grid->len = (GRIDWIDTH + 1) * GRIDHEIGHT;
-	grid->width = GRIDWIDTH;
-	grid->height = GRIDHEIGHT;
+	srand(time(0));
+	grid->slen = (GRIDWIDTH + 1) * GRIDHEIGHT;
+	grid->x = GRIDWIDTH;
+	grid->y = GRIDHEIGHT;
+	grid->size = grid->x * grid->y;
 
 	i = -1;
-	while (++i < grid->len)
-		grid->str[i] = '-';
-	i = grid->width;
-	while (i < grid->len)
+	while (++i < grid->slen)
+		grid->str[i] = BOXEMPTY;
+	i = grid->x;
+	while (i < grid->slen)
 	{
 		grid->str[i] = '\n';
-		i += grid->width + 1;
+		i += grid->x + 1;
 	}
-	grid->str[grid->len - 1] = 0;
+	grid->str[grid->slen - 1] = 0;
 }
 
-int		choice_index(s_grid grid, int choice)
+int		get_index(s_grid grid, int choice)
+{
+	int		idx;
+
+	idx = choice + grid.x - 1;
+	idx -= grid.y - ((choice - 1) / grid.x);
+	return (idx);
+}
+
+int		is_win_column(s_grid grid, char symbol)
 {
 	int		i;
+	int		n;
 
-	i = choice + grid.width - 1;
-	i -= grid.height - ((choice - 1) / grid.width);
-	return (i);
+	i = -1;
+	while (++i < grid.x)
+	{
+		n = -1;
+		while (++n <= grid.y && grid.str[i + (n * (grid.x + 1))] == symbol)
+			;
+		if (n == grid.y)
+			return (1);
+	}
+	return (0);
 }
 
-void	play_user(s_grid *grid)
+int		is_win_line(s_grid grid, char symbol)
+{
+	int		i;
+	int		n;
+
+	i = -1;
+	while (++i < grid.y)
+	{
+		n = -1;
+		while (++n <= grid.x && grid.str[n + (i * (grid.y + 1))] == symbol)
+			;
+		if (n == grid.x)
+			return (1);
+	}
+	return (0);
+}
+
+int		is_win_diagonal(s_grid grid, char symbol)
+{
+	int		n;
+
+	if (grid.y != grid.x)
+		return (0);
+	n = -1;
+	while (++n <= grid.x && grid.str[n + n + n * grid.x] == symbol)
+		;
+	if (n == grid.x)
+		return (1);
+	n = -1;
+	while (++n <= grid.x && grid.str[(grid.x * (grid.x - n)) - 1] == symbol)
+		;
+	if (n == grid.x)
+		return (1);
+	return (0);
+}
+
+int		is_win(s_grid grid, char symbol)
+{
+	return (is_win_line(grid, symbol)\
+			|| is_win_column(grid, symbol)\
+			|| is_win_diagonal(grid, symbol));
+}
+
+void	fill_box(s_grid *grid, int idx, char fillchar)
+{
+	grid->str[idx] = fillchar;
+}
+
+int		play_user(s_grid *grid, char symbol)
 {
 	char	str[100];
-	int		choice;
+	int		idx;
 
 	str[0] = 0;
-	while (str[0] < '1' || str[0] > '9' || strlen(str) > 1)
-		scanf("%s", str);
-	choice = str[0] - '0';
-	/* dprintf(1, "height: %d\nwidth: %d\nchoice: %d\n", grid->height, grid->width, choice); */
-	grid->str[choice_index(*grid, choice)] = 'x';
-}
-
-void	play_cpu(s_grid *grid)
-{
-	grid->str[choice_index(*grid, rand() % 10)] = 'o';
-}
-
-void	play(s_grid *grid)
-{
-	int		n_turn;
-	int		cur_turn;
-	void	(*player1)(s_grid*);
-	void	(*player2)(s_grid*);
-
-	player1 = &play_user;
-	player2 = &play_cpu;
-	n_turn = grid->width * grid->height;
-	dprintf(1, "n_turn: %d\n", n_turn);
-	cur_turn = -1;
-	while (++cur_turn < n_turn)
+	while (!*str)
 	{
-		dprintf(1, "==== turn: %d ====\n", cur_turn + 1);
-		player1(grid);
-		player2(grid);
-		dprintf(1, "%s\n", grid->str);
+		dprintf(1, "What's your play ? [1-9]\n");
+		scanf("%s", str);
+		idx = get_index(*grid, str[0] - '0');
+		if (str[0] < '1' || str[0] > '9' || strlen(str) > 1 || idx < 0)
+		{
+			dprintf(1, "Wrong position: '%s'. ", str);
+			str[0] = 0;
+		}
 	}
+	fill_box(grid, idx, symbol);
+	return (is_win(*grid, symbol));
+}
+
+int		play_cpu(s_grid *grid, char symbol)
+{
+	int		idx;
+	int		try;
+
+	idx = -1;
+	try = rand() % (grid->y * grid->x);
+	idx = get_index(*grid, try);
+	while (grid->str[idx] != BOXEMPTY)
+	{
+		if (idx == grid->slen - 1)
+			idx = -1;
+		idx++;
+		/* dprintf(1, "l"); */
+	}
+	fill_box(grid, idx, symbol);
+	dprintf(1, "%s\n\n", grid->str);
+	/* usleep(1000000); */
+	return (is_win(*grid, symbol));
+}
+
+int		print_win(int player)
+{
+	dprintf(1, "Player%d won!\n", player);
+	return(player);
+}
+
+int		play(s_grid *grid)
+{
+	int		turn;
+	int		(*player1)(s_grid*, char);
+	int		(*player2)(s_grid*, char);
+
+	player1 = &play_cpu;
+	player2 = &play_cpu;
+	turn = -1;
+	while (++turn < grid->size)
+	{
+		dprintf(1, "==== turn: %d ====\n", turn + 1);
+		if (player1(grid, BOXPLAYER1) == 1)
+			return (print_win(1));
+		if (++turn < grid->size - 1)
+			if (player2(grid, BOXPLAYER2) == 1)
+				return (print_win(2));
+	}
+	dprintf(1, "Draw.");
+	return (0);
 }
 
 int main(void)
@@ -83,10 +182,11 @@ int main(void)
 	s_grid		grid;
 
 	grid_init(&grid);
-	dprintf(1, "grid->width: %d\n", grid.width);
-	dprintf(1, "grid->height: %d\n", grid.height);
-	dprintf(1, "grid->total: %d\n", grid.len);
+	dprintf(1, "grid->x: %d\n", grid.x);
+	dprintf(1, "grid->height: %d\n", grid.y);
+	dprintf(1, "grid->total: %d\n", grid.slen);
 	dprintf(1, "%s\n", grid.str);
 	play(&grid);
 	return (0);
 }
+

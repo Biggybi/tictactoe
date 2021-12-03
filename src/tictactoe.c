@@ -128,7 +128,7 @@ int		play_user(s_grid *grid, char symbol)
 	return (is_win(*grid, symbol));
 }
 
-int		play_cpu(s_grid *grid, char symbol)
+int		play_cpu(s_grid *grid, char symbol, int turn)
 {
 	int		idx;
 	int		try;
@@ -143,9 +143,11 @@ int		play_cpu(s_grid *grid, char symbol)
 		idx++;
 		/* dprintf(1, "l"); */
 	}
+	system("clear");
+	dprintf(1, "==== turn: %d ====\n", turn + 1);
 	fill_box(grid, idx, symbol);
 	dprintf(1, "%s\n\n", grid->str);
-	/* usleep(1000000); */
+	usleep(1000000);
 	return (is_win(*grid, symbol));
 }
 
@@ -158,19 +160,19 @@ int		print_win(int player)
 int		play(s_grid *grid)
 {
 	int		turn;
-	int		(*player1)(s_grid*, char);
-	int		(*player2)(s_grid*, char);
+	int		(*player1)(s_grid*, char, int);
+	int		(*player2)(s_grid*, char, int);
 
 	player1 = &play_cpu;
 	player2 = &play_cpu;
 	turn = -1;
 	while (++turn < grid->size)
 	{
-		dprintf(1, "==== turn: %d ====\n", turn + 1);
-		if (player1(grid, BOXPLAYER1) == 1)
+		if (player1(grid, BOXPLAYER1, turn) == 1)
 			return (print_win(1));
+		system("clear");
 		if (++turn < grid->size - 1)
-			if (player2(grid, BOXPLAYER2) == 1)
+			if (player2(grid, BOXPLAYER2, turn) == 1)
 				return (print_win(2));
 	}
 	dprintf(1, "Draw.");

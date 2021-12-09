@@ -95,33 +95,60 @@ int		is_win(char grid[GRIDLEN], int player)
 	return (is_win_y(grid, c) || is_win_x(grid, c) || is_win_xy(grid, c));
 }
 
+void	line_init(char line[GRIDX * 4 + 2], char empty, char sep)
+{
+	int		i;
+
+	line[GRIDX * 4 + 1] = 0;
+	i = -1;
+	while (++i < GRIDX * 4 + 1)
+		line[i] = empty;
+	i = -4;
+	while ((i+=4) < GRIDX * 4 + 1)
+		line[i] = sep;
+}
+
+void	line_symbols(char grid[GRIDLEN], char line[GRIDX * 4 + 2], int n)
+{
+	int		i;
+
+	i = -2;
+	while ((i+=4) < GRIDX * 4)
+		line[i] = grid[(GRIDX + 1) * n + i / 4];
+}
+
+void	line_outer_init(char line[GRIDX * 4 + 2], char inner, char outer)
+{
+	int		i;
+
+	line[GRIDX * 4 + 1] = 0;
+	line[GRIDX * 4] = inner;
+	line[0] = inner;
+	i = 0;
+	while (++i < GRIDX * 4)
+		line[i] = outer;
+}
+
 void	print_grid(char grid[GRIDLEN])
 {
 	int		i;
-	char	edgesline[GRIDX * 4 + 2];
-	char	interline[GRIDX * 4 + 2];
+	char	line_deco_outer[GRIDX * 4 + 2];
+	char	line_deco_inner[GRIDX * 4 + 2];
+	char	line_grid[GRIDX * 4 + 2];
 
-	interline[GRIDX * 4 + 1] = 0;
-	edgesline[GRIDX * 4 + 1] = 0;
-	edgesline[GRIDX * 4] =  '+';
-	edgesline[0] = '+';
-	i = 0;
-	while (++i < GRIDX * 4)
-		edgesline[i] = '-';
+	line_outer_init(line_deco_outer, '+', '-');
+	line_init(line_grid, ' ', '|');
+	line_init(line_deco_inner, '-', '|');
+	printf("\n%s\n", line_deco_outer);
 	i = -1;
-	while (++i < GRIDX * 4 + 1)
-		interline[i] = '-';
-	i = -4;
-	while ((i+=4) < GRIDX * 4 + 1)
-		interline[i] = '|';
-	printf("\n%s\n", edgesline);
-	i = -1;
-	while (++i < GRIDLEN - 1)
-		if (i > 0 && (i + 1) % (GRIDX + 1) == 0)
-			printf("|\n%s\n", interline);
-		else
-			printf("| %c ", grid[i]);
-	printf("|\n%s\n", edgesline);
+	while (++i < GRIDY)
+	{
+		line_symbols(grid, line_grid, i);
+		printf("%s\n", line_grid);
+		if (i != GRIDY - 1)
+			printf("%s\n", line_deco_inner);
+	}
+	printf("%s\n", line_deco_outer);
 }
 
 void	print_turn(int turn)

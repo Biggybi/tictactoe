@@ -13,7 +13,7 @@ long double log2l(long double x);
 # define GRIDX 3
 # define GRIDY 3
 # define GRIDSIZE GRIDY * GRIDX
-# define GRIDLEN (GRIDY + 1) * GRIDX
+# define GRIDLEN (GRIDX + 1) * GRIDY
 # define BOXEMPTY '-'
 # define BOXPLAYER1 'x'
 # define BOXPLAYER2 'o'

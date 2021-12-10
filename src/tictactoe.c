@@ -153,28 +153,46 @@ void	print_grid(char grid[GRIDLEN])
 
 void	print_turn(int turn)
 {
-	system("clear");
+	/* system("clear"); */
 	printf("==== turn %d ====\n", turn + 1);
+}
+
+unsigned long		intlen(unsigned long n)
+{
+	int		i;
+
+	/* if (n == -2147483648) */
+	/* 	return (11); */
+	i = 0;
+	if (n < 0)
+	{
+		n = -n;
+		i++;
+	}
+	while (n /= 10)
+		i++;
+	return (i + 1);
 }
 
 int		turn_user(char grid[GRIDLEN], int turn, int player)
 {
-	char	str[100];
+	char	str[intlen(GRIDSIZE)];
 	int		idx;
+	int		input;
 
-	str[0] = 0;
+	bzero(str, intlen(GRIDSIZE));
 	while (!str[0])
 	{
 		print_turn(turn);
 		print_grid(grid);
 		printf("What's your play ? [1-9]\n");
 		scanf("%s", str);
-		/* Note: Should atoi this shit */
-		idx = get_index(str[0] - '0');
-		if (str[0] < '1' || str[0] > '9' || strlen(str) > 1 || idx < 0 || grid[idx] != BOXEMPTY)
+		input = atoi(str);
+		idx = input + ((input - 1) / GRIDX) - 1;
+		if (input < 0 || input > GRIDSIZE || grid[idx] != BOXEMPTY)
 		{
 			printf("Wrong position: '%s'. ", str);
-			str[0] = 0;
+			bzero(str, intlen(GRIDSIZE));
 		}
 	}
 	grid[idx] = get_symbol(player);
@@ -201,7 +219,6 @@ int		minimax(char grid[GRIDLEN], int player)
 		if(grid[i] == BOXEMPTY)
 		{
 			grid[i] = get_symbol(player);
-			/* dprintf(1, "%d\n", score); */
 			newscore = -minimax(grid, player*-1);
 			if(newscore > score)
 			{
@@ -253,7 +270,7 @@ int		turn_cpu(char grid[GRIDLEN], int turn, int player)
 
 int		print_win(char grid[GRIDLEN], int player, int turn)
 {
-	system("clear");
+	/* system("clear"); */
 	print_turn(turn);
 	print_grid(grid);
 	printf("Player%d won!\n", player);
@@ -266,8 +283,8 @@ int		play(char grid[GRIDLEN])
 	int		(*turn_p1)(char[], int, int);
 	int		(*turn_p2)(char[], int, int);
 
-	turn_p1 = &turn_cpu;
-	turn_p2 = &turn_cpu;
+	turn_p1 = &turn_user;
+	turn_p2 = &turn_user;
 	/* turn_p2 = &turn_cpu; */
 	turn = -1;
 	while (++turn < GRIDSIZE)
@@ -280,22 +297,22 @@ int		play(char grid[GRIDLEN])
 	return (0);
 }
 
-int		intlen(int n)
-{
-	int		i;
+/* int		intlen(int n) */
+/* { */
+/* 	int		i; */
 
-	if (n == -2147483648)
-		return (11);
-	i = 0;
-	if (n < 0)
-	{
-		n = -n;
-		i++;
-	}
-	while (n /= 10)
-		i++;
-	return (i + 1);
-}
+/* 	if (n == -2147483648) */
+/* 		return (11); */
+/* 	i = 0; */
+/* 	if (n < 0) */
+/* 	{ */
+/* 		n = -n; */
+/* 		i++; */
+/* 	} */
+/* 	while (n /= 10) */
+/* 		i++; */
+/* 	return (i + 1); */
+/* } */
 
 int main(void)
 {
@@ -305,7 +322,7 @@ int main(void)
 	re[0] = 13;
 	while (re[0] == 13 || re[0] == 'y' || !re[0])
 	{
-		system("clear");
+		/* system("clear"); */
 		printf("New Tic-tac-toe Game!\n");
 		grid_init(grid);
 		print_grid(grid);

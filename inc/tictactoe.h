@@ -6,9 +6,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-double log2(double x);
-float log2f(float x);
-long double log2l(long double x);
+int		is_win(char grid[], int player);
+int		print_win(char grid[], int turn, int player);
+void	print_grid(char grid[]);
+void	print_turn(int turn, int player);
+int		turn_cpu(char grid[], int turn, int player);
+int		turn_user(char grid[], int turn, int player);
+char	get_symbol(int player);
+int		intlen(int n);
 
 # define GRIDX 3
 # define GRIDY 3

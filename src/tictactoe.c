@@ -1,28 +1,15 @@
 #include "tictactoe.h"
 #include <stdio.h>
 
-void	grid_init(char grid[GRIDLEN])
+void	grid_init(char grid[])
 {
 	int		i;
 
 	i = -1;
-	while (++i < GRIDLEN)
+	while (++i < GRIDSIZE)
 		grid[i] = BOXEMPTY;
-	i = -1;
-	while (i < GRIDLEN - GRIDX)
-	{
-		i += GRIDX + 1;
-		grid[i] = '\n';
-	}
-	grid[GRIDLEN - 1] = 0;
-}
-
-int		get_index(int move)
-{
-	int		idx;
-
-	idx = move + GRIDY - 1 - GRIDX + ((move - 1) / GRIDY);
-	return (idx);
+	grid[i] = 0;
+	/* grid[GRIDSIZE - 1] = 0; */
 }
 
 char	get_symbol(int player)
@@ -34,7 +21,7 @@ char	get_symbol(int player)
 	return (0);
 }
 
-int		is_win_x(char grid[GRIDLEN], char symbol)
+int		is_win_x(char grid[], char symbol)
 {
 	int		i;
 	int		n;
@@ -42,57 +29,58 @@ int		is_win_x(char grid[GRIDLEN], char symbol)
 	i = -1;
 	while (++i < GRIDY)
 	{
-		n = -1;
-		while (++n <= GRIDX && grid[i + (n * (GRIDY + 1))] == symbol)
-			;
+		n = 0;
+		while (n <= GRIDX && grid[n + (i * GRIDY)] == symbol)
+			n++;
 		if (n == GRIDX)
 			return (1);
 	}
 	return (0);
 }
 
-int		is_win_y(char grid[GRIDLEN], char symbol)
+int		is_win_y(char grid[], char symbol)
 {
-	int		i;
+	int		x;
 	int		n;
 
-	i = -1;
-	while (++i < GRIDX)
+	x = -1;
+	while (++x < GRIDX)
 	{
-		n = -1;
-		while (++n <= GRIDY && grid[n + (i * (GRIDX + 1))] == symbol)
-			;
+		n = 0;
+		while (n <= GRIDY && grid[x + (n * GRIDX)] == symbol)
+			n++;
 		if (n == GRIDY)
 			return (1);
 	}
 	return (0);
 }
 
-int		is_win_xy(char grid[GRIDLEN], char symbol)
+int		is_win_xy(char grid[], char symbol)
 {
 	int		n;
 
 	if (GRIDX != GRIDY)
 		return (0);
-	n = -1;
-	while (++n <= GRIDY && grid[n * (GRIDY + 2)] == symbol)
-		;
+	n = 0;
+	while (n < GRIDY && grid[n * (GRIDY + 1)] == symbol)
+		n++;
 	if (n == GRIDY)
 		return (1);
-	n = -1;
-	while (++n <= GRIDY && grid[(GRIDY * (GRIDY - n)) - 1] == symbol)
-		;
+	n = 0;
+	while (n < GRIDY && grid[GRIDX * (GRIDY - n - 1) + n] == symbol)
+		n++;
 	if (n == GRIDY)
 		return (1);
 	return (0);
 }
 
-int		is_win(char grid[GRIDLEN], int player)
+int		is_win(char grid[], int player)
 {
 	char c;
 
 	c = get_symbol(player);
 	return (is_win_y(grid, c) || is_win_x(grid, c) || is_win_xy(grid, c));
+	/* return (is_win_y(grid, c) || is_win_x(grid, c)); */
 }
 
 void	line_init(char line[GRIDX * 4 + 2], char empty, char sep)
@@ -108,13 +96,13 @@ void	line_init(char line[GRIDX * 4 + 2], char empty, char sep)
 		line[i] = sep;
 }
 
-void	line_symbols(char grid[GRIDLEN], char line[GRIDX * 4 + 2], int n)
+void	line_symbols(char grid[], char line[GRIDX * 4 + 2], int idx)
 {
 	int		i;
 
 	i = -2;
 	while ((i+=4) < GRIDX * 4)
-		line[i] = grid[(GRIDX + 1) * n + i / 4];
+		line[i] = grid[(GRIDX * idx) + (i / 4)];
 }
 
 void	line_outer_init(char line[GRIDX * 4 + 2], char inner, char outer)
@@ -129,13 +117,14 @@ void	line_outer_init(char line[GRIDX * 4 + 2], char inner, char outer)
 		line[i] = outer;
 }
 
-void	print_grid(char grid[GRIDLEN])
+void	print_grid(char grid[])
 {
 	int		i;
 	char	line_deco_outer[GRIDX * 4 + 2];
 	char	line_deco_inner[GRIDX * 4 + 2];
 	char	line_grid[GRIDX * 4 + 2];
 
+	dprintf(1, "print grid\n");
 	line_outer_init(line_deco_outer, '+', '-');
 	line_init(line_grid, ' ', '|');
 	line_init(line_deco_inner, '-', '|');
@@ -151,18 +140,18 @@ void	print_grid(char grid[GRIDLEN])
 	printf("%s\n", line_deco_outer);
 }
 
-void	print_turn(int turn)
+void	print_turn(int turn, int player)
 {
 	/* system("clear"); */
-	printf("==== turn %d ====\n", turn + 1);
+	printf("====  turn %d  |  player %d  ====\n", turn + 1, player);
 }
 
-unsigned long		intlen(unsigned long n)
+int		intlen(int n)
 {
 	int		i;
 
-	/* if (n == -2147483648) */
-	/* 	return (11); */
+	if (n == -2147483648)
+		return (11);
 	i = 0;
 	if (n < 0)
 	{
@@ -174,7 +163,7 @@ unsigned long		intlen(unsigned long n)
 	return (i + 1);
 }
 
-int		turn_user(char grid[GRIDLEN], int turn, int player)
+int		turn_user(char grid[], int turn, int player)
 {
 	char	str[intlen(GRIDSIZE)];
 	int		idx;
@@ -183,12 +172,12 @@ int		turn_user(char grid[GRIDLEN], int turn, int player)
 	bzero(str, intlen(GRIDSIZE));
 	while (!str[0])
 	{
-		print_turn(turn);
+		print_turn(turn, player);
 		print_grid(grid);
 		printf("What's your play ? [1-%d]\n", GRIDSIZE);
 		scanf("%s", str);
 		input = atoi(str);
-		idx = input + ((input - 1) / GRIDX) - 1;
+		idx = input - 1;
 		if (input < 0 || input > GRIDSIZE || grid[idx] != BOXEMPTY)
 		{
 			printf("Wrong position: '%s'. ", str);
@@ -200,7 +189,7 @@ int		turn_user(char grid[GRIDLEN], int turn, int player)
 	return (is_win(grid, player));
 }
 
-int		minimax(char grid[GRIDLEN], int player)
+int		minimax(char grid[], int player)
 {
 	int		move;
 	int		score;
@@ -214,7 +203,7 @@ int		minimax(char grid[GRIDLEN], int player)
 	if (is_win(grid, -player))
 		return (-1);
 	i = -1;
-	while (++i < GRIDLEN)
+	while (++i < GRIDSIZE)
 	{
 		if(grid[i] == BOXEMPTY)
 		{
@@ -231,7 +220,7 @@ int		minimax(char grid[GRIDLEN], int player)
 	return ((move != -1) * score);
 }
 
-int		move_cpu(char grid[GRIDLEN], int player)
+int		move_cpu(char grid[], int player)
 {
 	int		move;
 	int		score;
@@ -241,7 +230,7 @@ int		move_cpu(char grid[GRIDLEN], int player)
 	move = -1;
 	score = -2;
 	i = -1;
-	while (++i < GRIDLEN)
+	while (++i < GRIDSIZE)
 	{
 		if(grid[i] == BOXEMPTY)
 		{
@@ -259,25 +248,25 @@ int		move_cpu(char grid[GRIDLEN], int player)
 	return (move);
 }
 
-int		turn_cpu(char grid[GRIDLEN], int turn, int player)
+int		turn_cpu(char grid[], int turn, int player)
 {
 	move_cpu(grid, player);
-	print_turn(turn);
+	print_turn(turn, player);
 	print_grid(grid);
 	usleep(PAUSETIME);
 	return (is_win(grid, player));
 }
 
-int		print_win(char grid[GRIDLEN], int player, int turn)
+int		print_win(char grid[], int turn, int player)
 {
 	/* system("clear"); */
-	print_turn(turn);
+	print_turn(turn, player);
 	print_grid(grid);
 	printf("Player%d won!\n", player);
 	return (player);
 }
 
-int		play(char grid[GRIDLEN])
+int		play(char grid[])
 {
 	int		turn;
 	int		(*turn_p1)(char[], int, int);
@@ -289,10 +278,10 @@ int		play(char grid[GRIDLEN])
 	turn = -1;
 	while (++turn < GRIDSIZE)
 		if (turn_p1(grid, turn, 1) == 1)
-			return (print_win(grid, 1, turn));
+			return (print_win(grid, turn, 1));
 		else if (++turn < GRIDSIZE - (GRIDSIZE % 2))
 			if (turn_p2(grid, turn, -1) == 1)
-				return (print_win(grid, 2, turn));
+				return (print_win(grid, turn, 2));
 	printf("Draw.\n");
 	return (0);
 }
@@ -316,7 +305,7 @@ int		play(char grid[GRIDLEN])
 
 int main(void)
 {
-	char	grid[GRIDLEN];
+	char	grid[GRIDSIZE];
 	char	re[1];
 
 	re[0] = 13;

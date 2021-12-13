@@ -185,7 +185,7 @@ int		turn_user(char grid[GRIDLEN], int turn, int player)
 	{
 		print_turn(turn);
 		print_grid(grid);
-		printf("What's your play ? [1-9]\n");
+		printf("What's your play ? [1-%d]\n", GRIDSIZE);
 		scanf("%s", str);
 		input = atoi(str);
 		idx = input + ((input - 1) / GRIDX) - 1;

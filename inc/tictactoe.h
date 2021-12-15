@@ -14,6 +14,8 @@ int		turn_cpu(char grid[], int turn, int player);
 int		turn_user(char grid[], int turn, int player);
 char	get_symbol(int player);
 int		intlen(int n);
+int		max(int a, int b);
+int		min(int a, int b);
 
 # define GRIDX 3
 # define GRIDY 3

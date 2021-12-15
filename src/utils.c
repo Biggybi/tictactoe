@@ -1,5 +1,17 @@
 #include "tictactoe.h"
 
+int		max(int a, int b)
+{
+	/* return (((a >= b) * a) + ((b > a) * b)); */
+	return ((a & -(a >= b)) | (b & -(b > a)));
+}
+
+int		min(int a, int b)
+{
+	/* return (((a <= b) * a) + ((b < a) * b)); */
+	return ((a & -(a <= b)) | (b & -(b < a)));
+}
+
 char	get_symbol(int player)
 {
 	if (player == 1)

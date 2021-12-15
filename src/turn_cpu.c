@@ -20,12 +20,12 @@ static int		minimax(char grid[], int player)
 		{
 			grid[i] = get_symbol(player);
 			newscore = -minimax(grid, player*-1);
+			grid[i] = BOXEMPTY;
 			if(newscore > score)
 			{
 				score = newscore;
 				move = i;
 			}
-			grid[i] = BOXEMPTY;
 		}
 	}
 	return ((move != -1) * score);

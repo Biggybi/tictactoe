@@ -5,29 +5,27 @@ int		turn_user(char grid[], int turn, int player)
 	char	str[intlen(GRIDSIZE)];
 	int		idx;
 	int		input;
-	int		wrong_input;
 
-	wrong_input = 0;
+	idx = 0;
 	bzero(str, intlen(GRIDSIZE));
 	while (!str[0])
 	{
 		print_turn(turn, player);
 		print_grid(grid);
-		if (wrong_input)
+		if (idx == -1)
 			printf("Wrong position: '%d'. ", input);
-		printf("What's your play ? [1-%d]\n", GRIDSIZE);
-		wrong_input = 0;
+		printf("What's your play ? [1-%d]\n> ", GRIDSIZE);
 		scanf("%s", str);
 		input = atoi(str);
 		idx = input - 1;
-		if (input < 0 || input > GRIDSIZE || grid[idx] != BOXEMPTY)
+		if (input < 0 || input > GRIDSIZE || grid[idx] != GRIDEMPTY)
 		{
 			bzero(str, intlen(GRIDSIZE));
-			wrong_input = 1;
+			idx = -1;
 		}
 	}
 	grid[idx] = get_symbol(player);
-	usleep(PAUSETIME);
+	usleep(DELAY);
 	return (is_win(grid, player));
 }
 

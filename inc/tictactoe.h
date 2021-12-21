@@ -20,9 +20,9 @@ int		min(int a, int b);
 # define GRIDX 3
 # define GRIDY 3
 # define GRIDSIZE GRIDY * GRIDX
-# define BOXEMPTY '-'
-# define BOXPLAYER1 'x'
-# define BOXPLAYER2 'o'
-# define PAUSETIME 0
+# define GRIDEMPTY '-'
+# define GRIDP1 'x'
+# define GRIDP2 'o'
+# define DELAY 0
 
 #endif

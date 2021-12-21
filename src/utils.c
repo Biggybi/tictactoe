@@ -15,9 +15,9 @@ int		min(int a, int b)
 char	get_symbol(int player)
 {
 	if (player == 1)
-		return (BOXPLAYER1);
+		return (GRIDP1);
 	if (player == -1)
-		return (BOXPLAYER2);
+		return (GRIDP2);
 	return (0);
 }
 

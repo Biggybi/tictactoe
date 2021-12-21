@@ -7,7 +7,7 @@ void	grid_init(char grid[])
 
 	i = -1;
 	while (++i < GRIDSIZE)
-		grid[i] = BOXEMPTY;
+		grid[i] = GRIDEMPTY;
 	grid[i] = 0;
 }
 
@@ -18,8 +18,7 @@ int		play(char grid[])
 	int		(*turn_p2)(char[], int, int);
 
 	turn_p1 = &turn_user;
-	turn_p2 = &turn_user;
-	/* turn_p2 = &turn_cpu; */
+	turn_p2 = &turn_cpu;
 	turn = -1;
 	while (++turn < GRIDSIZE)
 		if (turn_p1(grid, turn, 1) == 1)
@@ -44,7 +43,7 @@ int		main(void)
 		grid_init(grid);
 		print_grid(grid);
 		play(grid);
-		printf("Play again? [yes/no]\n-> ");
+		printf("Play again? [yes/no]\n> ");
 		scanf("%s", re);
 		/* fgets(re, 100, stdin); */
 	}
